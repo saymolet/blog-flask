@@ -82,7 +82,7 @@ def admin_only(f):
         if current_user.is_anonymous is False and current_user.id == 1:
             return f(*args, **kwargs)
         else:
-            return abort(401)
+            return abort(403)
     return decorated_function
 
 
