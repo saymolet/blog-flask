@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "blog"
+version = "0.0.1"
+description = "Blog build with Python using Flask. Has authentication, password hashing, database, forms, comments, admin privilages for the first user, errorhandling."
+authors = ["Vladyslav Samoilenko <vladyslav.samoilenko@proton.me>"]
+license = "The Unlicense"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^2.2.2"
+flask-login = "^0.6.2"
+werkzeug = "^2.2.2"
+flask-wtf = "^1.1.1"
+wtforms = "^3.0.1"
+flask-ckeditor = "^0.4.6"
+sqlalchemy = "^1.4.46"
+flask-sqlalchemy = "^3.0.2"
+flask-bootstrap = "^3.3.7.1"
+flask-gravatar = "^0.5.0"
+datetime = "^5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
