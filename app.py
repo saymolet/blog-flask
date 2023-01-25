@@ -15,7 +15,7 @@ import os
 login_manager = LoginManager()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(32)
+app.config['SECRET_KEY'] = "DMLKSlk882NDJKNSJ388AN"
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
