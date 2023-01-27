@@ -15,18 +15,18 @@ https://user-images.githubusercontent.com/101016860/215082267-2daccfbb-82a5-43ff
 Export database password as an environmental variable:
 
 ```shell
-export DB_PASSWORD={your_password}
+$ export DB_PASSWORD={your_password}
 ```
 
 Export pgadmin4 password as an environmental variable:
 
 ```shell
-export PG4_PASSWORD={your_password}
+$ export PG4_PASSWORD={your_password}
 ```
 
 Export forms secret key as an environmental variable:
 ```shell
-export FORMS_KEY={random_string}
+$ export FORMS_KEY={random_string}
 ```
 
 ## Usage
@@ -34,13 +34,13 @@ export FORMS_KEY={random_string}
 Build docker image of the application:
 
 ```shell
-docker build -t flask-blog:latest .
+$ docker build -t flask-blog:latest .
 ```
 
 Then use the docker-compose file to bring up
 three containers:
 ```shell
-docker-compose -f docker-compose.yaml up
+$ docker-compose -f docker-compose.yaml up
 ```
 
 The application will be available at `127.0.0.1:5000`. 
