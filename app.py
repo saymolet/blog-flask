@@ -10,17 +10,23 @@ from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
 from functools import wraps
 import datetime
+import psycopg2
 import os
 
 login_manager = LoginManager()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "DMLKSlk882NDJKNSJ388AN"
+app.config['SECRET_KEY'] = os.getenv("FORMS_KEY")
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+# use sqlite for local testing
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+db_password = os.getenv('DB_PWD')
+db_container = os.getenv('DB_NAME')
+db_user = os.getenv('DB_USER')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{db_user}:{db_password}@{db_container}:5432/posts"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -33,7 +39,8 @@ gravatar = Gravatar(app,
                     force_default=False,
                     force_lower=False,
                     use_ssl=False,
-                    base_url=None)
+                    base_url=None
+                    )
 
 
 # CONFIGURE TABLE
@@ -51,7 +58,7 @@ class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id = db.Column(db.Integer, primary_key=True)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    title = db.Column(db.String(250), unique=True, nullable=False)
+    title = db.Column(db.String(250), nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
@@ -84,6 +91,19 @@ def admin_only(f):
         else:
             return abort(403)
     return decorated_function
+
+
+# def fix_id():
+#     # update all comments post_id to reflect its position
+#     comments = Comment.query.all()
+#     for i, comment in enumerate(comments):
+#         comment.post_id = i + 1
+#
+#     # update all posts id to reflect its position
+#     posts = BlogPost.query.all()
+#     for i, post in enumerate(posts):
+#         post.id = i + 1
+
 
 
 @app.route('/')
@@ -146,7 +166,7 @@ def edit_post(post_id):
         # Populate all the changed data to post object entry in DB
         edit_form.populate_obj(post)
         db.session.commit()
-        return render_template("post.html", post=post)
+        return redirect(url_for("show_post", post_id=post_id))
 
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
@@ -182,16 +202,6 @@ def delete_post(post_id):
     for comment in comments_delete:
         db.session.delete(comment)
     db.session.delete(post_to_delete)
-
-    # update all comments post_id to reflect its position
-    comments = Comment.query.all()
-    for i, comment in enumerate(comments):
-        comment.post_id = i + 1
-
-    # update all posts id to reflect its position
-    posts = BlogPost.query.all()
-    for i, post in enumerate(posts):
-        post.id = i + 1
     db.session.commit()
     return redirect(url_for("get_all_posts"))
 

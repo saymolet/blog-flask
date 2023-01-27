@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  flask-blog:
+    restart: always
+    image: flask-blog
+    ports:
+      - "5000:5000"
+    container_name: flask-blog_container
+    environment:
+      DB_NAME: postgres-db
+      DB_PWD: ${DB_PASSWORD}
+      DB_USER: postgres
+      FORMS_KEY: ${FORMS_KEY}
+    depends_on:
+      - postgres-db
+
+  postgres-db:
+    restart: always
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    container_name: postgres_container
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: posts
+      POSTGRES_USER: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    restart: always
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres-db
+    container_name: pgadmin_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${PG4_PASSWORD}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  postgres-data:
+    driver: local
+  pgadmin-data:
+    driver: local
