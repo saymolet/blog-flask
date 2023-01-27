@@ -5,6 +5,8 @@ Blog build with Python using Flask. Complete with authentication, password hashi
 ## Demo
 
 
+https://user-images.githubusercontent.com/101016860/215082267-2daccfbb-82a5-43ff-b7ab-9d2a8104b892.mp4
+
 
 ## Prerequisites
 * Docker
