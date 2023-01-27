@@ -55,7 +55,7 @@ Fill in the information as seen below in the `Connection` tab
 (password is `DB_PASSWORD` env) and
 name it anything you like in the `General` tab, then click save.
 
-<div style="text-align: center">
+<div align="center">
 <img src="images/img.png" alt="drawing" width="400"/>
 </div>
 
