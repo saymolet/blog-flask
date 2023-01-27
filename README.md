@@ -55,7 +55,9 @@ Fill in the information as seen below in the `Connection` tab
 (password is `DB_PASSWORD` env) and
 name it anything you like in the `General` tab, then click save.
 
-![pgadmin4_config](images/img.png)
+<div style="text-align: center">
+<img src="images/img.png" alt="drawing" width="400"/>
+</div>
 
 To see the data go to `Servers-->{your_db_name}-->posts-->
 Schemas-->public-->Tables`. Then right click on any table and
