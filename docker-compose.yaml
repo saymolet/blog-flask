@@ -17,7 +17,7 @@ services:
 
   postgres-db:
     restart: always
-    image: postgres:latest
+    image: postgres:15.1
     ports:
       - "5432:5432"
     container_name: postgres_container
@@ -30,7 +30,7 @@ services:
 
   pgadmin:
     restart: always
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:6.19
     ports:
       - "8080:80"
     depends_on:
