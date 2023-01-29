@@ -45,7 +45,7 @@ $ docker-compose -f docker-compose.yaml up
 
 The application will be available at `127.0.0.1:5000`. 
 The first user to register is granted admin privileges to
-do create, edit and delete posts from the blog. Other users
+create, edit and delete posts from the blog. Other users
 can only read and comment on posts. 
 
 You can access the pgadmin4 at `127.0.0.1:8080`. The standard
