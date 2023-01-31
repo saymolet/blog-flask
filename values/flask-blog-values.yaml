@@ -1,0 +1,54 @@
+##### STATEFUL SET #####
+deploymentKind: Deployment
+appName: flask-blog
+replicas: 1
+appImage: saymolet/flask-blog
+appVersion: "2.0"
+imagePullPolicy: "IfNotPresent"
+containerPort: 5000
+
+containerEnvVars:
+- name: DB_NAME
+  valueFromType: configMapKeyRef
+  nameConfig: flask-blog-configmap
+  keyConfig: DB_NAME
+- name: DB_USER
+  valueFromType: configMapKeyRef
+  nameConfig: flask-blog-configmap
+  keyConfig: DB_USER
+- name: DB_PWD
+  valueFromType: secretKeyRef
+  nameConfig: flask-blog-secret
+  keyConfig: DB_PWD
+- name: FORMS_KEY
+  valueFromType: secretKeyRef
+  nameConfig: flask-blog-secret
+  keyConfig: FORMS_KEY
+
+readinessProbe: 1
+readinessProbeType: httpGet
+initialDelaySeconds: 15
+periodSeconds: 5
+
+##### SERVICE #####
+serviceName: flask-blog-service
+serviceType: LoadBalancer
+servicePort: 5000
+serviceProtocol: TCP
+
+##### CONFIG MAP #####
+configName: flask-blog-configmap
+configMapVars:
+- name: DB_NAME
+  value: postgres-service
+- name: DB_USER
+  value: postgres
+
+##### SECRET #####
+secretName: flask-blog-secret
+secretVars:
+- name: DB_PWD
+  value: defaultpwd
+- name: FORMS_KEY
+  value: defaultpwd
+

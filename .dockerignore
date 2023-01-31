@@ -1,4 +1,7 @@
 instance
 .env
 __pycache__
+servers-jsons
+images
 K8s-TEST
+charts

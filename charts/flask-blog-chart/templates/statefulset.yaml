@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: {{ .Values.deploymentKind }}
+metadata:
+  name:  {{ .Values.appName }}
+spec:
+  replicas: {{ .Values.replicas }}
+  {{- if .Values.StatefulSet}}
+  updateStrategy:
+    type: RollingUpdate
+  {{- end}}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.appImage }}:{{ .Values.appVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          env:
+          {{- range .Values.simpleContainerEnvVars}}
+          - name: {{ .name }}
+            value: {{ .value | quote }}
+          {{- end}}
+          {{- range .Values.containerEnvVars}}
+          - name: {{ .name }}
+            valueFrom:
+              {{ .valueFromType }}:
+                name: {{ .nameConfig }}
+                key: {{ .keyConfig }}
+          {{- end}}
+          {{- if .Values.readinessProbe}}
+          readinessProbe:
+            {{ .Values.readinessProbeType }}:
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            periodSeconds: {{ .Values.periodSeconds }}
+          {{- end}}
+          {{- if .Values.StatefulSet}}
+          volumeMounts:
+            - name: {{ .Values.volumeName }}
+              mountPath: {{ .Values.mountPath }}
+              {{- if .Values.subPath}}
+              subPath: {{ .Values.subPath }}
+              {{- end}}
+      {{- if .Values.volumePgFixRights}}
+      initContainers:
+      - name: pgadmin-data-permission-fix
+        image: busybox:1.28
+        command: ["/bin/sh", "-c", "chown 5050:5050 /var/lib/pgadmin"]
+        volumeMounts:
+          - name: {{ .Values.volumeName }}
+            mountPath: {{ .Values.mountPath }}
+      {{- end}}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ .Values.volumeName }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+         storage: {{ .Values.volumeSize }}
+          {{- end}}

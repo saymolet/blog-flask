@@ -1,0 +1,29 @@
+releases:
+  - name: flask-blog
+    chart: charts/flask-blog-chart
+    values:
+      - values/flask-blog-values.yaml
+      - secretVars:
+          - name: DB_PWD
+            value: {{ requiredEnv "DB_PASSWORD" }}
+          - name: FORMS_KEY
+            value: {{ requiredEnv "FORMS_KEY" }}
+
+  - name: postgresdb
+    chart: charts/flask-blog-chart
+    values:
+      - values/postgres-values.yaml
+      - secretVars:
+          - name: POSTGRES_PASSWORD
+            value: {{ requiredEnv "DB_PASSWORD" }}
+
+  - name: pgadmin4
+    chart: charts/flask-blog-chart
+    values:
+      - values/pgadmin4-values.yaml
+      - secretVars:
+          - name: pgadmin-password
+            value: {{ requiredEnv "PG4_PASSWORD" }}
+      - configMapVars:
+          - name: PGADMIN_DEFAULT_EMAIL
+            value: {{ requiredEnv "PG4_EMAIL" }}

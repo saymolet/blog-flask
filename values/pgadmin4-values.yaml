@@ -1,0 +1,53 @@
+##### STATEFUL SET #####
+deploymentKind: StatefulSet
+appName: pgadmin
+replicas: 1
+appImage: dpage/pgadmin4
+appVersion: 6.19
+imagePullPolicy: "IfNotPresent"
+containerPort: 5050
+
+simpleContainerEnvVars:
+- name: PGADMIN_LISTEN_PORT
+  value: 5050
+
+containerEnvVars:
+- name: PGADMIN_DEFAULT_EMAIL
+  valueFromType: configMapKeyRef
+  nameConfig: pgadmin-configmap
+  keyConfig: PGADMIN_DEFAULT_EMAIL
+- name: PGADMIN_DEFAULT_PASSWORD
+  valueFromType: secretKeyRef
+  nameConfig: pgadmin-secret
+  keyConfig: pgadmin-password
+
+readinessProbe: 1
+readinessProbeType: httpGet
+initialDelaySeconds: 15
+periodSeconds: 5
+
+volumePgFixRights: 1
+StatefulSet: 1
+volumeName: pgadmin-data
+mountPath: /var/lib/pgadmin
+volumeSize: 3Gi
+
+
+##### SERVICE #####
+serviceName: pgadmin-service
+serviceType: LoadBalancer
+servicePort: 80
+serviceProtocol: TCP
+
+##### CONFIG MAP #####
+configName: pgadmin-configmap
+configMapVars:
+- name: PGADMIN_DEFAULT_EMAIL
+  value: default@default.com
+
+##### SECRET #####
+secretName: pgadmin-secret
+secretVars:
+- name: pgadmin-password
+  value: defaultpwd
+

@@ -33,14 +33,14 @@ services:
     image: dpage/pgadmin4:6.19
     ports:
       - "8080:80"
-    depends_on:
-      - postgres-db
     container_name: pgadmin_container
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_EMAIL: ${PG4_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PG4_PASSWORD}
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres-db
 
 volumes:
   postgres-data:
