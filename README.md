@@ -36,7 +36,7 @@ $ export PG4_PASSWORD={your_password}
 
 Export pgadmin4 email as an environmental variable:
 ```shell
-export PG4_EMAIL={your_email}
+$ export PG4_EMAIL={your_email}
 ```
 
 Export forms secret key as an environmental variable:
@@ -77,7 +77,7 @@ Now just expand the `Servers` tab and input the password from
 `DB_PASSWORD` env var.
 
 <div align="center">
-<img src="images/img.png" alt="drawing" width="400"/>
+<img src="images/img.png" alt="drawing" width="700"/>
 </div>
 
 To see the data go to `Servers-->{your_db_name}-->posts-->
@@ -91,13 +91,9 @@ docker-compose -f docker-compose.yaml down
 
 ### Kubernetes
 
-I've written a custom helm chart for this project. This
-chart will deploy Stateful Sets for pgadmin4 and PostgreSQL,
-Deployment for the application and all the respected Config Maps,
-Secrets, Services and VolumeClaims. This chart was tested locally
-with the help of the `minikube`, and all worked as expected.
+I've written a custom helm chart for this project. This chart will deploy Stateful Sets for pgadmin4 and PostgreSQL, Deployment for the application and all the respected Config Maps, Secrets, Services and VolumeClaims. This chart was tested locally with the help of the `minikube`, and all worked as expected.
 
-Also, chart was tested at a managed K8s cluster (LKE), and pgadmin was behaiving weird. It won't log in any users; it's just stuck at the log-in screen. I wasn't able to find the solution to this problem, but other than that, the application works fine.
+Also, the chart was tested at a managed K8s cluster (LKE), and pgadmin was behaiving weird. It won't log in any users; it's just stuck at the log-in screen. I wasn't able to find the solution to this problem, but other than that, the application works fine.
 
 If pgadmin works fine for you, then you just need to import the server exactly the same as in Docker deployment, just use the `servers-k8s.json` file instead.
 
@@ -115,12 +111,6 @@ $ helmfile destroy
 ```
 Note that the command above WILL NOT delete the PVC and PV from the cluster.
 
-
 ## Reference
 
 CSS and the idea for this application came from [Angela Yu](https://github.com/angelabauer)
-
-
-
-
-
