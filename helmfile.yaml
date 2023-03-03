@@ -4,7 +4,7 @@ releases:
     values:
       - values/flask-blog-values.yaml
       # appImage and appVersion is pulled from env. Convinient for the pipeline
-      - appImage: {{ requiredEnv "IMAGE_NAME" }}
+      - appImage: '{{ requiredEnv "DOCKER_REPO" }}/{{ requiredEnv "IMAGE_NAME" }}'
       - appVersion: {{ requiredEnv "IMAGE_VERSION" }}
       - secretVars:
           - name: DB_PWD
