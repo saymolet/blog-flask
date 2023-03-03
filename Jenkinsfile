@@ -1,5 +1,12 @@
 #!/usr/bin/env groovy
 
+library identifier: 'jenkins-shared-library@main', retriever: modernSCM (
+    [$class: 'GitSCMSource',
+      remote: 'https://gitlab.com/saymolet/jenkins-shared-library.git',
+      credentialsId: 'gitlab-credentials'
+    ]
+)
+
 pipeline {
     agent any
 
@@ -41,7 +48,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'artifact-registry-key', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
                     sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}" // better security.
-                    sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
+                    sh "docker push ${  }/${IMAGE_NAME}:${IMAGE_VERSION}"
                 }                   
                 }
             }
