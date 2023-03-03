@@ -60,8 +60,11 @@ pipeline {
                     echo "Deploying to GKE"
                     // my-registry-key secret deployed on GKE to be able to pull from private Artifact Registry on nodes
                     // https://cloud.google.com/artifact-registry/docs/docker/authentication
-                    // all of env variables are exported beforehand 
+                    // all of env variables are exported beforehand in jenkins global params
                     // helmfile installed on jenkins
+                    // scope set on gcloud vm to "Allow full access to all Cloud APIs". Then control it with IAM
+                    // auth to cluster
+                    sh "gcloud container clusters get-credentials flask-blog-cluster --zone europe-west3-a --project exemplary-torch-377814"
                     sh "helmfile sync"
                 }
             }
