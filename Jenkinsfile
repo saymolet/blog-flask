@@ -4,7 +4,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REPO = "europe-west3-docker.pkg.dev/exemplary-torch-377814/flask-blog"
+        DOCKER_REPO_SERVER = "europe-west3-docker.pkg.dev"
+        DOCKER_REPO = "${DOCKER_REPO_SERVER}/exemplary-torch-377814/flask-blog"
+
     }    
 
     stages {
@@ -32,12 +34,15 @@ pipeline {
 
         stage("build and push docker image to Artifact Registry") {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
+                script {       
                     // gcloud init set beforehand on jenkins container 
-                    // gcloud auth to Artifact Registry beforehand
+                    // $ gcloud auth print-access-token to get the access token + -u oauth2accesstoken on gcloud
                     // $ gcloud auth configure-docker europe-west3-docker.pkg.dev
+                    withCredentials([usernamePassword(credentialsId: 'artifact-registry-key', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
+                    sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}" // better security.
                     sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
+                }                   
                 }
             }
         }
@@ -49,6 +54,7 @@ pipeline {
                     // my-registry-key secret deployed on GKE to be able to pull from private Artifact Registry on nodes
                     // https://cloud.google.com/artifact-registry/docs/docker/authentication
                     // all of env variables are exported beforehand 
+                    // helmfile installed on jenkins
                     sh "helmfile sync"
                 }
             }
