@@ -47,8 +47,8 @@ pipeline {
                     // $ gcloud auth configure-docker europe-west3-docker.pkg.dev
                     withCredentials([usernamePassword(credentialsId: 'artifact-registry-key', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
-                    sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}" // better security.
-                    sh "docker push ${  }/${IMAGE_NAME}:${IMAGE_VERSION}"
+                    sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}"
+                    sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
                 }                   
                 }
             }
