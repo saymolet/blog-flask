@@ -7,6 +7,7 @@ spec:
   {{- if .Values.StatefulSet}}
   updateStrategy:
     type: RollingUpdate
+  serviceName: {{ .Values.serviceName }}   
   {{- end}}
   selector:
     matchLabels:
@@ -16,6 +17,8 @@ spec:
       labels:
         app: {{ .Values.appName }}
     spec:
+      imagePullSecrets:
+        - name: my-registry-key
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.appImage }}:{{ .Values.appVersion }}"

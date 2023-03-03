@@ -1,10 +1,10 @@
-##### STATEFUL SET #####
+##### DEPLOYMENT #####
 deploymentKind: Deployment
 appName: flask-blog
 replicas: 1
 appImage: saymolet/flask-blog
 appVersion: "2.0"
-imagePullPolicy: "IfNotPresent"
+imagePullPolicy: "Always"
 containerPort: 5000
 
 containerEnvVars:

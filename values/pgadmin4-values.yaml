@@ -35,8 +35,8 @@ volumeSize: 3Gi
 
 ##### SERVICE #####
 serviceName: pgadmin-service
-serviceType: LoadBalancer
-servicePort: 80
+serviceType: NodePort
+servicePort: 5050
 serviceProtocol: TCP
 
 ##### CONFIG MAP #####
