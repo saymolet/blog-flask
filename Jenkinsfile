@@ -25,8 +25,9 @@ pipeline {
                     // apt install python3
                     // apt install python3-pip
                     // pip install poetry
+                    // install helm + helmfile + kubectl
 
-                    sh "poetry version minor"
+                    sh "poetry version minor" // you can change which version to bump (major, minor or patch)
                     sh "chmod u+x ./scripts/find_name_version.sh"
                     def name = sh(script: "./scripts/find_name_version.sh 0", returnStdout: true).trim()
                     def version = sh(script: "./scripts/find_name_version.sh 1", returnStdout: true).trim()
@@ -49,7 +50,7 @@ pipeline {
                     sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
                     sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}"
                     sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
-                }                   
+                    }                   
                 }
             }
         }

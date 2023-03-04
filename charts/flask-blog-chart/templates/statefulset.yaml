@@ -18,7 +18,7 @@ spec:
         app: {{ .Values.appName }}
     spec:
       imagePullSecrets:
-        - name: my-registry-key
+        - name: {{ .Values.imagePullSecretsName }}
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.appImage }}:{{ .Values.appVersion }}"

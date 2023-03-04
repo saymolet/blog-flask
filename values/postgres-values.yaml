@@ -6,6 +6,7 @@ appImage: postgres
 appVersion: 15.1
 imagePullPolicy: "IfNotPresent"
 containerPort: 5432
+imagePullSecretsName: my-registry-key
 
 containerEnvVars:
 - name: POSTGRES_DB

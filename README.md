@@ -1,6 +1,6 @@
 # Flask Blog
 
-This Blog was build with Python using Flask. Complete with authentication, password hashing, a database, forms, comments, admin privileges for the first user, and error-handling. You can either deploy it with the help of the docker-compose file or deploy it to the Kubernetes cluster with the help of the custom Helm chart. 
+This Blog was build with Python using Flask. Complete with authentication, password hashing, a database, forms, comments, admin privileges for the first user, and error-handling. You can either deploy it with the help of the docker-compose file or deploy it to the Kubernetes cluster with the help of the custom Helm chart.
 
 ## Demo
 
@@ -9,27 +9,41 @@ https://user-images.githubusercontent.com/101016860/215082267-2daccfbb-82a5-43ff
 
 
 ## Prerequisites
+#### For Docker deployment:
 
-For Docker deployment:
-* Docker
-* Docker Compose
+* [Docker](https://docs.docker.com/engine/install/ubuntu/)
+* [Docker Compose](https://docs.docker.com/compose/install/linux/)
 
-For Kubernetes deployment:
+#### For Kubernetes deployment:
+
 * Any kubernetes cluster (Managed or Local)
-* Helm
-* Helmfile
-* Kubectl
+* [Helm](https://helm.sh/docs/intro/install/)
+* [Helmfile](https://helmfile.readthedocs.io/en/latest/#installation)
+* [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) 
 
-In both setups you need to export the following environmental variables.
+#### For CI/CD Pipeline:
+
+* Any kubernetes cluster (Managed or Local)
+* Separate [Docker-in-docker Jenkins](https://www.jenkins.io/doc/book/installing/docker/) instance
+* Artifact Registry repository
+
+On Jenkins:
+* [Helm](https://helm.sh/docs/intro/install/) 
+* [Helmfile](https://helmfile.readthedocs.io/en/latest/#installation) 
+* [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+* [Cloud SDK](https://cloud.google.com/sdk/docs/install#linux) 
+* Python3 + [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
+
+I am more than sure that the setup for the Jenkins machine can be automated using Ansible playbooks. This will be a future improvement for this project.
+
+In both setups you need to export the following environmental variables. (For CI/CD you need to export them inside Jenkins)
 
 Export database password as an environmental variable:
-
 ```shell
 $ export DB_PASSWORD={your_password}
 ```
 
 Export pgadmin4 password as an environmental variable:
-
 ```shell
 $ export PG4_PASSWORD={your_password}
 ```
@@ -44,6 +58,22 @@ Export forms secret key as an environmental variable:
 $ export FORMS_KEY={random_string}
 ```
 
+In addition to that if you want to deploy it to kubernetes you need to export a couple more env vars to be able to pull an image locally. The project was tailored for a pipeline, which pulls from a private docker repository, but you can easily put a plain public image there. The syntaxis for an image name in a helmfile is `DOCKER_REPO/IMAGE_NAME:IMAGE_VERSION`. 
+
+Export the docker repository,  image name, and image version:
+```shell
+$ export DOCKER_REPO={your_private_repo} or {docker_hub_account}
+$ export IMAGE_NAME={the_name_of_the_image}
+$ export IMAGE_VERSION={image_version}
+```
+
+If you want to test it locally you can pull my public image `saymolet/flask-blog:2.0`
+```shell
+$ export DOCKER_REPO=saymolet
+$ export IMAGE_NAME=flask-blog
+$ export IMAGE_VERSION=2.0
+```
+
 ## Usage
 
 ### Docker
@@ -54,62 +84,108 @@ Build docker image of the application:
 $ docker build -t flask-blog .
 ```
 
-Then use the docker-compose file to bring up
-three containers:
+Then use the docker-compose file to bring up three containers:
+
 ```shell
 $ docker-compose -f docker-compose.yaml up
 ```
 
-The application will be available at `127.0.0.1:5000`. 
-The first user to register is granted admin privileges to
-create, edit and delete posts from the blog. Other users
-can only read and comment on posts. 
+The application will be available at `127.0.0.1:5000`. The first user to register is granted admin privileges to create, edit and delete posts from the blog. Other users can only read and comment on posts.
 
-You can access the pgadmin4 at `127.0.0.1:8080`. The 
-email for admin user is env variable `PG4_EMAIL`. The password 
-is the env variable `PG4_PASSWORD` exported at the start.
+You can access the pgadmin4 at `127.0.0.1:8080`. The email for admin user is env variable `PG4_EMAIL`. The password is the env variable `PG4_PASSWORD` exported at the start.
 
-The first time you log in to the pgadmin4 you will not see
-the database just yet. Import the server by clicking 
-`Tools-->Import/Export Servers...-->Upload the servers-docker.json
-file located in servers-jsons folder-->Next-->Choose the server-->Next-->Finish`
-Now just expand the `Servers` tab and input the password from
-`DB_PASSWORD` env var.
+The first time you log in to the pgadmin4 you will not see the database just yet. Import the server by clicking `Tools-->Import/Export Servers...-->Upload the servers-docker.json file located in servers-jsons folder-->Next-->Choose the server-->Next-->Finish` Now just expand the `Servers` tab and input the password from `DB_PASSWORD` env var.
 
-<div align="center">
-<img src="images/img.png" alt="drawing" width="700"/>
+<div  align="center">
+<img  src="images/img.png"  alt="drawing"  width="700"/>
 </div>
 
-To see the data go to `Servers-->{your_db_name}-->posts-->
-Schemas-->public-->Tables`. Then right click on any table and
-select `View/Edit Data-->All Rows`.
+To see the data go to `Servers-->{your_db_name}-->posts-->Schemas-->public-->Tables`. Then right click on any table and select `View/Edit Data-->All Rows`.
 
 Uninstall docker setup with the folowing command:
-``````shell
+```shell
 docker-compose -f docker-compose.yaml down
-``````
+```
 
 ### Kubernetes
 
-I've written a custom helm chart for this project. This chart will deploy Stateful Sets for pgadmin4 and PostgreSQL, Deployment for the application and all the respected Config Maps, Secrets, Services and VolumeClaims. This chart was tested locally with the help of the `minikube`, and all worked as expected.
-
-Also, the chart was tested at a managed K8s cluster (LKE), and pgadmin was behaiving weird. It won't log in any users; it's just stuck at the log-in screen. I wasn't able to find the solution to this problem, but other than that, the application works fine.
-
-If pgadmin works fine for you, then you just need to import the server exactly the same as in Docker deployment, just use the `servers-k8s.json` file instead.
+I've written a custom helm chart for this project. This chart will deploy Stateful Sets for pgadmin4 and PostgreSQL, Deployment for the application and all the respected Config Maps, Secrets, Services and VolumeClaims. This chart was tested locally with the help of the `minikube`, and all worked as expected. Also I've tested the chart on a managed GKE cluster (Google Cloud).
 
 Deploy the helm chart:
 ```shell
 $ helmfile sync
 ```
-Check the pods in the cluster:
-```shell
-$ kubectl get pods
+
+After a short while you will see three pods:
 ```
+$ kubectl get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+flask-blog-8454db7dcc-nmh57   1/1     Running   0          12h
+pgadmin-0                     1/1     Running   0          12h
+postgres-0                    1/1     Running   0          12h
+```
+
+A couple of services will be created. For example:
+
+```
+$ kubectl get svc
+NAME                 TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE
+flask-blog-service   LoadBalancer   10.108.14.197   34.159.197.191   5000:30440/TCP   12h
+pgadmin-service      NodePort       10.108.8.100    <none>           5050:30419/TCP   12h
+postgres-service     ClusterIP      10.108.13.150   <none>           5432/TCP         12h
+```
+If you are using minikube as your cluster you need to forward services using [minikube service](https://minikube.sigs.k8s.io/docs/commands/service/)
+
+If you see this then everything works fine. The application itself is reached through the LoadBalancer. In this example you can reach the app by following `34.159.197.191:5000`. 
+The pgadmin4 can be reached through a NodePort, so you need to to some port-forwarding.
+```
+kubectl port-forward pgadmin-0 8081:5050
+```
+or
+```
+kubectl port-forward $(kubectl get pod --selector="app=pgadmin" --output jsonpath='{.items[0].metadata.name}') 8081:5050
+```
+
+To see the DB you just need to import the server for the pgadmin exactly the same as in the Docker deployment, just use the `servers-k8s.json` file instead.
+
 Destroy and purge the deployed helm charts:
 ```shell
 $ helmfile destroy
 ```
 Note that the command above WILL NOT delete the PVC and PV from the cluster.
+
+### CI/CD Pipeline with Jenkins
+
+This pipeline was tailored for Google Kubernetes Engine (GKE) on Google Cloud Platform (GCP) but it can be easily rewritten for another cloud provider like Linode or AWS. The pipeline has 4 stages
+* increment version
+* build and push docker image to Artifact Registry
+* deploy to GKE
+* commit version update
+
+#### increment_version
+Increments the apps version using a custom script located in `/scripts` directory. Saves the image name, image version, and build number as an environmental variable.
+#### build and push docker image to Artifact Registry
+Build the image with specified docker repo server,  image name, image version, and build number. [Logins to the private docker repo](https://cloud.google.com/artifact-registry/docs/docker/authentication#token) using predefined Jenkins credentials. Pushes the said image to a private repository.
+#### deploy to GKE
+Google Compute instance needs to have apropriete [auth scopes](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#changeserviceaccountandscopes) to be able to login to the cluster. The best practice for auth scopes is to grant a VM `cloud-platform` scope and then manage it by giving the least privilages needed throug IAM roles. 
+
+You also need to configure a [docker-registry secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line) on the cluster so that the pods inside your cluster will be able to pull images from the private repository.  So for my example the creation of this secret will look something like this:
+
+```shell
+kubectl create secret docker-registry my-registry-key \
+--docker-server=https://europe-west3-docker.pkg.dev \
+--docker-username=oauth2accesstoken \
+--docker-password=${gcloud auth print-access-token} \
+--docker-email=vlad@samoilenko.xyz
+```
+The name for this secret is referenced in the helm chart in `spec.template.spec.imagePullSecrets`. It is parameterized in the `values` files so you can change the name of the secret in the command and in the `values.yaml` file
+
+The stage gets the credentials for the hardcoded cluster and deploys the workload with `helmfile sync` command.
+#### commit version update
+Utilizes the [custom shared library](https://gitlab.com/saymolet/jenkins-shared-library.git) to login, config and push the version bump to the main branch.
+
+### If you have any questions or propositions please contact me at [vlad@samoilenko.xyz](mailto:vlad@samoilenko.xyz). I will gladly answer them.
+
 
 ## Reference
 

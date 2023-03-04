@@ -6,6 +6,7 @@ appImage: dpage/pgadmin4
 appVersion: 6.19
 imagePullPolicy: "IfNotPresent"
 containerPort: 5050
+imagePullSecretsName: my-registry-key
 
 simpleContainerEnvVars:
 - name: PGADMIN_LISTEN_PORT

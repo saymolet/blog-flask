@@ -6,6 +6,7 @@ appImage: saymolet/flask-blog
 appVersion: "2.0"
 imagePullPolicy: "Always"
 containerPort: 5000
+imagePullSecretsName: my-registry-key
 
 containerEnvVars:
 - name: DB_NAME
