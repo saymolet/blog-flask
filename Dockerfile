@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM python:3.10-slim-buster as app
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -12,6 +12,7 @@ ENV PYTHONFAULTHANDLER=1 \
 RUN pip install "poetry==$POETRY_VERSION"
 RUN mkdir "/usr/app/"
 WORKDIR /usr/app
+
 # Copy only requirements to cache them in docker layer
 COPY poetry.lock pyproject.toml /usr/app/
 
@@ -19,8 +20,15 @@ COPY poetry.lock pyproject.toml /usr/app/
 RUN pip install psycopg2-binary && \
     poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
-
 COPY . /usr/app
 
-EXPOSE 5000
-CMD python -m flask run --host=0.0.0.0
+# install nginx
+RUN apt update && \
+    apt install nginx -y
+
+# replace config and restart nginx
+RUN mv /usr/app/nginx/nginx.conf /etc/nginx/nginx.conf && \
+    chmod a+x scripts/docker-entrypoint.sh
+
+EXPOSE 80
+CMD ["/bin/sh", "scripts/docker-entrypoint.sh"]

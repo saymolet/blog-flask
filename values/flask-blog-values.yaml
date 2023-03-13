@@ -3,9 +3,9 @@ deploymentKind: Deployment
 appName: flask-blog
 replicas: 1
 appImage: saymolet/flask-blog
-appVersion: "2.0"
+appVersion: "3"
 imagePullPolicy: "Always"
-containerPort: 5000
+containerPort: 80
 imagePullSecretsName: my-registry-key
 
 containerEnvVars:
@@ -34,7 +34,7 @@ periodSeconds: 5
 ##### SERVICE #####
 serviceName: flask-blog-service
 serviceType: LoadBalancer
-servicePort: 5000
+servicePort: 80
 serviceProtocol: TCP
 
 ##### CONFIG MAP #####
