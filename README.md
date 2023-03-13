@@ -67,11 +67,11 @@ $ export IMAGE_NAME={the_name_of_the_image}
 $ export IMAGE_VERSION={image_version}
 ```
 
-If you want to test it locally you can pull my public image `saymolet/flask-blog:2.0`
+If you want to test it locally you can pull my public image `saymolet/flask-blog:3`
 ```shell
 $ export DOCKER_REPO=saymolet
 $ export IMAGE_NAME=flask-blog
-$ export IMAGE_VERSION=2.0
+$ export IMAGE_VERSION=3
 ```
 
 ## Usage
@@ -90,7 +90,7 @@ Then use the docker-compose file to bring up three containers:
 $ docker-compose -f docker-compose.yaml up
 ```
 
-The application will be available at `127.0.0.1:5000`. The first user to register is granted admin privileges to create, edit, and delete posts from the blog. Other users can only read and comment on posts.
+The application will be available at `127.0.0.1:80`. The first user to register is granted admin privileges to create, edit, and delete posts from the blog. Other users can only read and comment on posts.
 
 You can access pgadmin4 at `127.0.0.1:8080`. The email for admin user is env variable `PG4_EMAIL`. The password is the environment variable `PG4_PASSWORD` exported at the start.
 
@@ -136,10 +136,10 @@ postgres-service     ClusterIP      10.108.13.150   <none>           5432/TCP   
 ```
 If you are using minikube as your cluster you need to forward services using [minikube service](https://minikube.sigs.k8s.io/docs/commands/service/)
 
-If you see this, then everything is fine. The application itself is reached through the LoadBalancer. In this example, you can reach the app by following `34.159.197.191:5000`. 
+If you see this, then everything is fine. The application itself is reached through the LoadBalancer. In this example, you can reach the app by following `34.159.197.191`. 
 The pgadmin4 can be reached through a NodePort, so you need to do some port-forwarding.
 ```
-kubectl port-forward pgadmin-0 8081:5050
+kubectl port-forward pgadmin-service 8081:5050
 ```
 or
 ```
