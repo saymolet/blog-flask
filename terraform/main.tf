@@ -110,7 +110,7 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   # do not create vm instance before service account and static ip
-  depends_on = [google_service_account.jenkins, google_compute_address.jenkins-external-ip, google_container_cluster.primary, google_container_node_pool.flask_nodes]
+  depends_on = [google_service_account.jenkins, google_compute_address.jenkins-external-ip]
 }
 ########################### JENKINS ###########################
 
@@ -191,5 +191,3 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
   ]
 }
 ########################### ARTIFACT REGISTRY ###########################
-
-#CHANGE-ME-OH-PLEASE-CHANGE-ME-I-AM-NOT-SECURE

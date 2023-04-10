@@ -23,7 +23,7 @@ https://user-images.githubusercontent.com/101016860/215082267-2daccfbb-82a5-43ff
 
 #### For CI/CD Pipeline:
 
-* Any kubernetes cluster (Managed or Local)
+* Kubernetes cluster (this project will)
 * Separate [Docker-in-docker Jenkins](https://www.jenkins.io/doc/book/installing/docker/) instance
 * Artifact Registry repository
 
@@ -34,9 +34,9 @@ On Jenkins:
 * [Cloud SDK](https://cloud.google.com/sdk/docs/install#linux) 
 * Python3 + [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
 
-I am more than sure that the setup for the Jenkins machine can be automated using Ansible playbooks. This will be a future improvement for this project.
+Most of the preparation and infrastructure for the CI/CD setup is automated through Terraform.
 
-In both setups, you need to export the following environmental variables (For CI/CD, you need to export them inside Jenkins.)
+In both setups, you need to export the following environmental variables (For CI/CD, you need fill out credentials in Jenkins)
 
 Export database password as an environmental variable:
 ```shell
@@ -145,44 +145,52 @@ or
 ```
 kubectl port-forward $(kubectl get pod --selector="app=pgadmin" --output jsonpath='{.items[0].metadata.name}') 8081:5050
 ```
-
-To see the DB, you just need to import the server for pgadmin exactly the same as in the Docker deployment; just use the `servers-k8s.json` file instead.
+>To see the DB, you just need to import the server for pgadmin exactly the same as in the Docker deployment; just use the `servers-k8s.json` file instead.
 
 Destroy and purge the deployed helm charts:
 ```shell
 $ helmfile destroy
 ```
-Note that the command above WILL NOT delete the PVC and PV from the cluster.
+>Note that the command above WILL NOT delete the PVC and PV from the cluster. You need to delete them manually
 
 ### CI/CD Pipeline with Jenkins
+This pipeline was tailored for Google Kubernetes Engine (GKE) on Google Cloud Platform (GCP). Most of the preparation is automated through Terraform. `cd` into `terraform` directory and login to your GCP account using `gcloud auth application-default login` command. After that, execute `terraform plan` and `terraform apply` specifying the id of the project you want to deploy to. Terraform needs around `15-20` minutes to bring up the infrastructure. Jenkins VM has a startup script that will install all the necessary tools for the pipeline. After the script finishes, it will attach the initialAdminPassword to the VM as custom metadata called `ADMIN_PASS`. Pluck it into Jenkins and delete it afterwards.
 
-This pipeline was tailored for Google Kubernetes Engine (GKE) on Google Cloud Platform (GCP), but it can be easily rewritten for another cloud provider like Linode or AWS. The pipeline has four stages.
-* increment version
-* build and push docker image to Artifact Registry
-* deploy to GKE
-* commit version update
+Terraform will bring up the following:
+* Static IP for Jenkins VM
+* Jenkins VM
+	* e2-standard-2
+	* ubuntu 20.04
+	* Custom metadata
+* Service account for Jenkins VM 
+	* kubernetesEngineDeveloper role
+	* custom_computeMetadataWriter role (compute.instances.get, compute.instances.list, compute.instances.setMetadata)
+	* IAM binding to Artifact Registry
+* GKE Node Pool
+	* autoscaling (1-4 nodes)
+	* e2-medium
+* GKE Cluster
+* Service account for GKE Nodes
+	* artifactRegistryReader role
+* Artifact Registry repository
 
-#### increment_version
-The app's version is incremented using a custom script located in the `/scripts` directory. Saves the image name, image version, and build number as an environmental variable.
-#### build and push docker image to Artifact Registry
-Build the image with the specified Docker repository server, image name, image version, and build number. [Logins to the private docker repo](https://cloud.google.com/artifact-registry/docs/docker/authentication#token) using predefined Jenkins credentials Pushes the said image to a private repository.
-#### deploy to GKE
-A Google Compute instance needs to have the [proper scopes](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#changeserviceaccountandscopes) to be able to login to the cluster. The best practice for auth scopes is to grant a VM `cloud-platform` scope and then manage it by giving the least privileges needed through IAM roles.
+The pipeline has four stages.
+* Version Increment
+* Containerize
+* Deploy to Production
+* Version Control
 
-You also need to configure a [docker-registry secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line) on the cluster so that the pods inside your cluster will be able to pull images from the private repository. So for my example, the creation of this secret will look something like this:
+#### Version Increment
+The app's version is incremented using a custom script located in the `/scripts` directory. Saves the image name, image version, and build number as an environmental variable. Also pulls sensitive data from Jenkins credentials and exports them as environmental variables to use with helmfile.
+#### Containerize
+Build the image with the specified Docker repository server, image name, image version, and build number. [Logins to the private docker repo](https://cloud.google.com/artifact-registry/docs/docker/authentication#token) using the Jenkins service account with the appropriate IAM role attached to the instance and pushes the image.
+#### Deploy to Production
+Deploys the application to GKE using `helmfile` command. The nodes are able to pull the image from the private Artifact Registry repository through a service account with the right IAM roles.
 
-```shell
-kubectl create secret docker-registry my-registry-key \
---docker-server=https://europe-west3-docker.pkg.dev \
---docker-username=oauth2accesstoken \
---docker-password=${gcloud auth print-access-token} \
---docker-email=vlad@samoilenko.xyz
-```
-The name for this secret is referenced in the helm chart in `spec.template.spec.imagePullSecrets`. It is parameterized in the `values` files, so you can change the name of the secret in the command and in the `values.yaml` file.
+#### Version Control
+Login, configure, and push the version bump to the main branch. This is done with fine grained GitHub tokens, so you need to put yours inside Jenkins credentials.
 
-The stage gets the credentials for the hardcoded cluster and deploys the workload with `helmfile sync` command.
-#### commit version update
-Utilizes the [custom shared library](https://gitlab.com/saymolet/jenkins-shared-library.git) to login, configure, and push the version bump to the main branch.
+You need to change the default passwords in Jenkins credentials so it works right. After that, you can configure a pipeline to pull from your forked repo!
 
 ### If you have any questions or propositions please contact me at [vlad@samoilenko.xyz](mailto:vlad@samoilenko.xyz). I will gladly answer them.
 
