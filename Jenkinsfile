@@ -1,32 +1,12 @@
 #!/usr/bin/env groovy
 
-library identifier: 'jenkins-shared-library@main', retriever: modernSCM (
-    [$class: 'GitSCMSource',
-      remote: 'https://gitlab.com/saymolet/jenkins-shared-library.git',
-      credentialsId: 'gitlab-credentials'
-    ]
-)
-
 pipeline {
     agent any
 
-    environment {
-        DOCKER_REPO_SERVER = "europe-west3-docker.pkg.dev"
-        DOCKER_REPO = "${DOCKER_REPO_SERVER}/exemplary-torch-377814/flask-blog"
-
-    }    
-
     stages {
-        stage("increment_version") {
+        stage("Version Increment") {
             steps {
                 script {
-                    // install python3 and poetry separately on jenkins
-                    // docker exec -it -u 0 {jenkins_container_id} bash
-                    // apt install python3
-                    // apt install python3-pip
-                    // pip install poetry
-                    // install helm + helmfile + kubectl
-
                     sh "poetry version minor" // you can change which version to bump (major, minor or patch)
                     sh "chmod u+x ./scripts/find_name_version.sh"
                     def name = sh(script: "./scripts/find_name_version.sh 0", returnStdout: true).trim()
@@ -40,47 +20,44 @@ pipeline {
             }
         }
 
-        stage("build and push docker image to Artifact Registry") {
+        stage("Containerize") {
             steps {
                 script {       
-                    // gcloud init set beforehand on jenkins container 
-                    // $ gcloud auth print-access-token to get the access token + -u oauth2accesstoken on gcloud
-                    // $ gcloud auth configure-docker europe-west3-docker.pkg.dev
-                    withCredentials([usernamePassword(credentialsId: 'artifact-registry-key', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
-                    sh "echo $PASS | docker login -u $USER --password-stdin https://${DOCKER_REPO_SERVER}"
-                    sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
+                    sh "gcloud auth configure-docker --quiet ${env.ARTIFACT_DOCKER_SERVER}"
+                    sh "docker build -t ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."
+                    sh "docker push ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."
                     }                   
                 }
             }
         }
 
-        stage ("deploy to GKE") {
+        stage ("Deploy to Production") {
             steps {
                 script {
                     echo "Deploying to GKE"
-                    // my-registry-key secret deployed on GKE to be able to pull from private Artifact Registry on nodes
                     // https://cloud.google.com/artifact-registry/docs/docker/authentication
                     // all of env variables are exported beforehand in jenkins global params
-                    // helmfile installed on jenkins
                     // scope set on gcloud vm to "Allow full access to all Cloud APIs". Then control it with IAM
                     // auth to cluster
-                    sh "gcloud container clusters get-credentials flask-blog-cluster --zone europe-west3-a --project exemplary-torch-377814"
+                    sh "gcloud container clusters get-credentials ${env.CLUSTER_NAME} --zone ${env.CLUSTER_ZONE} --project ${env.PROJECT_ID}"
                     sh "helmfile sync"
                 }
             }
         }
 
-        stage("commit version update") {
+        stage("Version Control") {
             steps {
                 script {
-                    // first - credentials id in Jenkins, second - where to push. Repo url, omitting the https protocol
+                    // GIT_HUB_REPO - repo url, omitting the https protocol (ending in .git)
                     // use fine-grained token instead of a password to authenticate to github
-                    gitLoginRemote "github-fine-token", "github.com/saymolet/blog-flask.git"
-                    // email and username for jenkins. Displayed with commit
-                    gitConfig "jenkins@example.com", "jenkins"
-                    // branch where to push and message with commit
-                    gitAddCommitPush "main", "ci: version bump"
+                    withCredentials([usernamePassword(credentialsId: 'github-fine-token', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                        sh "git remote set-url origin https://$USER:$PASS@${env.GIT_HUB_REPO}"
+                    }
+                    sh "git config user.email jenkins@jenkins.com"
+                    sh "git config user.name Jenkins"
+                    sh 'git add .'
+                    sh "git commit -m 'ci: version bump'"
+                    sh "git push origin HEAD:main"
                 }
             }
         }

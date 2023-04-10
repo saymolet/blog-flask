@@ -43,23 +43,11 @@ credentials:
     domainCredentials:
     - credentials:
       - usernamePassword:
-          description: "artifact-registry-key"
-          id: "artifact-registry-key"
-          password: ""
-          scope: GLOBAL
-          username: "artifact-registry-key"
-      - usernamePassword:
           description: "github-fine-token"
           id: "github-fine-token"
           password: ""
           scope: GLOBAL
-          username: "github-fine-token"
-      - usernamePassword:
-          description: "gitlab-credentials"
-          id: "gitlab-credentials"
-          password: ""
-          scope: GLOBAL
-          username: "gitlab-credentials"                    
+          username: "github-fine-token"                   
 jenkins:
   globalNodeProperties:
   - envVars:
@@ -74,6 +62,8 @@ jenkins:
         value: "${ARTIFACT_REGION}-docker.pkg.dev"
       - key: "CLUSTER_NAME"
         value: "${CLUSTER_NAME}"
+      - key: "GIT_HUB_REPO"
+        value: ""        
       - key: "DB_PASSWORD"
         value: ""
       - key: "FORMS_KEY"
