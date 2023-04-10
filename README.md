@@ -23,7 +23,7 @@ https://user-images.githubusercontent.com/101016860/215082267-2daccfbb-82a5-43ff
 
 #### For CI/CD Pipeline:
 
-* Kubernetes cluster (this project will)
+* Kubernetes cluster (this project will use GKE)
 * Separate [Docker-in-docker Jenkins](https://www.jenkins.io/doc/book/installing/docker/) instance
 * Artifact Registry repository
 
