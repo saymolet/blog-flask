@@ -25,8 +25,7 @@ pipeline {
                 script {       
                     sh "gcloud auth configure-docker --quiet ${env.ARTIFACT_DOCKER_SERVER}"
                     sh "docker build -t ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."
-                    sh "docker push ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."
-                    }                   
+                    sh "docker push ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."                 
                 }
             }
         }

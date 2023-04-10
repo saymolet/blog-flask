@@ -3,6 +3,7 @@ instance
 __pycache__
 K8s-TEST
 Jenkinsfile-arp
+.terraform.lock.hcl
 
 # Created by https://www.toptal.com/developers/gitignore/api/terraform,flask,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=terraform,flask,python
