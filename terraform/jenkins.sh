@@ -47,7 +47,28 @@ credentials:
           id: "github-fine-token"
           password: ""
           scope: GLOBAL
-          username: "github-fine-token"                   
+          username: "github-fine-token"
+      - string:
+          description: "DB_PASSWORD"
+          id: "DB_PASSWORD"
+          scope: GLOBAL
+          secret: ""
+      - string:
+          description: "FORMS_KEY"
+          id: "FORMS_KEY"
+          scope: GLOBAL
+          secret: ""
+      - string:
+          description: "PG4_PASSWORD"
+          id: "PG4_PASSWORD"
+          scope: GLOBAL
+          secret: ""
+      - string:
+          description: "PG4_EMAIL"
+          id: "PG4_EMAIL"
+          scope: GLOBAL
+          secret: ""          
+
 jenkins:
   globalNodeProperties:
   - envVars:
@@ -62,16 +83,6 @@ jenkins:
         value: "${ARTIFACT_REGION}-docker.pkg.dev"
       - key: "CLUSTER_NAME"
         value: "${CLUSTER_NAME}"
-      - key: "GIT_HUB_REPO"
-        value: ""        
-      - key: "DB_PASSWORD"
-        value: ""
-      - key: "FORMS_KEY"
-        value: ""
-      - key: "PG4_PASSWORD"
-        value: ""
-      - key: "PG4_EMAIL"
-        value: ""
 EOF
 
 cat >/tmp/jenkins/Dockerfile <<EOL

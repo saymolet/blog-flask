@@ -7,6 +7,19 @@ pipeline {
         stage("Version Increment") {
             steps {
                 script {
+                    withCredentials([string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')]){
+                        env.DB_PASSWORD = "$DB_PASSWORD"
+                    }
+                    withCredentials([string(credentialsId: 'FORMS_KEY', variable: 'FORMS_KEY')]){
+                        env.FORMS_KEY = "$FORMS_KEY"
+                    }
+                    withCredentials([string(credentialsId: 'PG4_PASSWORD', variable: 'PG4_PASSWORD')]){
+                        env.PG4_PASSWORD = "$PG4_PASSWORD"
+                    }
+                    withCredentials([string(credentialsId: 'PG4_EMAIL', variable: 'PG4_EMAIL')]){
+                        env.PG4_EMAIL = "$PG4_EMAIL"
+                    }  
+                    
                     sh "poetry version minor" // you can change which version to bump (major, minor or patch)
                     sh "chmod u+x ./scripts/find_name_version.sh"
                     def name = sh(script: "./scripts/find_name_version.sh 0", returnStdout: true).trim()
@@ -22,10 +35,11 @@ pipeline {
 
         stage("Containerize") {
             steps {
-                script {       
+                script {
+                    env.DOCKER_REPO = "${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}"
                     sh "gcloud auth configure-docker --quiet ${env.ARTIFACT_DOCKER_SERVER}"
-                    sh "docker build -t ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."
-                    sh "docker push ${env.ARTIFACT_DOCKER_SERVER}/${env.PROJECT_ID}/${env.ARTIFACT_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} ."                 
+                    sh "docker build -t ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION} ."
+                    sh "docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_VERSION}"
                 }
             }
         }
