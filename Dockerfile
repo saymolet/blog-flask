@@ -24,7 +24,7 @@ COPY . /usr/app
 
 # install nginx
 RUN apt update && \
-    apt install nginx -y
+    apt install nginx=1.14.2-2+deb10u5 -y
 
 # replace config and restart nginx
 RUN mv /usr/app/nginx/nginx.conf /etc/nginx/nginx.conf && \
