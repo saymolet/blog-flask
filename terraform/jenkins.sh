@@ -112,7 +112,7 @@ sudo docker run --name jenkins-blueocean --restart=on-failure --detach \
   --volume jenkins-docker-certs:/certs/client:ro \
   myjenkins-blueocean:2.387.2-1
 
-sleep 30
+sleep 35
 
 jenkins_admin_pass=$(sudo docker exec jenkins-blueocean cat /var/jenkins_home/secrets/initialAdminPassword)
 

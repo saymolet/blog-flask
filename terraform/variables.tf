@@ -1,6 +1,5 @@
 variable "project_id" {
   type    = string
-  default = "exemplary-torch-377814"
 }
 
 # ------------- JENKINS -------------

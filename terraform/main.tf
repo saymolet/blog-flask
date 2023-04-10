@@ -1,16 +1,9 @@
 # This terraform file will create next resources: 
-# *static IP for VM
-# *service account for VM (with SQL Editor role)
-# *CloudSQL instance to use as the primary database (also create user and a database)
-
-# The startup script will perform everything needed to install NoviNano. All you need to do is to auth with your GCP account (`gcloud auth application-default login`) from within the folder. Next do `terraform plan` and input the data variables. After that do `terraform apply`, input data variables and wait around 10-15 minutes for the resources to create. Go to Compute Engine and click on the external IP address of the newly created VM. 
-
-# Available vars:
-# *compute_zone, compute_machine_type, service_account_id, site_v, sql_user, sql_pass, db_name, admin_login, admin_email, admin_pass
-
-# Example:
-# terraform plan -var site_v=ts -var sql_pass=$DB_PASS -var db_name=$DB_NAME -var admin_pass=$ADMIN_PASS -var admin_login=$ADMIN_LOGIN
-# terraform apply -var site_v=ts -var sql_pass=$DB_PASS -var db_name=$DB_NAME -var admin_pass=$ADMIN_PASS -var admin_login=$ADMIN_LOGIN
+# *static IP for Jenkins VM
+# *service account for Jenkins VM (with kubernetesEngineDeveloper, custom_computeMetadataWriter roles)
+# *service account for GKE Nodes (with artifactRegistryReader role)
+# *GKE Node Pool and GKE Cluster
+# *Artifact Registry repository
 
 provider "google" {
   project = var.project_id
@@ -89,7 +82,7 @@ resource "google_compute_instance" "vm_instance" {
   metadata = {
     PROJECT_ID   = var.project_id
     CLUSTER_ZONE = var.compute_zone
-    # CLUSTER_NAME = google_container_cluster.primary.name
+    CLUSTER_NAME = google_container_cluster.primary.name
     ARTIFACT_NAME   = google_artifact_registry_repository.flask-blog-repo.name
     ARTIFACT_REGION = var.artifact_region
     JENKINS_INSTANCE_NAME = "jenkins-${random_id.jenkins_name_suffix.hex}"
@@ -117,7 +110,7 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   # do not create vm instance before service account and static ip
-  depends_on = [google_service_account.jenkins, google_compute_address.jenkins-external-ip]
+  depends_on = [google_service_account.jenkins, google_compute_address.jenkins-external-ip, google_container_cluster.primary, google_container_node_pool.flask_nodes]
 }
 ########################### JENKINS ###########################
 
