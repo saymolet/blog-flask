@@ -154,6 +154,11 @@ $ helmfile destroy
 >Note that the command above WILL NOT delete the PVC and PV from the cluster. You need to delete them manually
 
 ### CI/CD Pipeline with Jenkins
+
+<div  align="center">
+<img  src="images/cicd.svg"  alt="ci_cd"/>
+</div>
+
 This pipeline was tailored for Google Kubernetes Engine (GKE) on Google Cloud Platform (GCP). Most of the preparation is automated through Terraform. `cd` into `terraform` directory and login to your GCP account using `gcloud auth application-default login` command. After that, execute `terraform plan` and `terraform apply` specifying the id of the project you want to deploy to. Terraform needs around `15-20` minutes to bring up the infrastructure. Jenkins VM has a startup script that will install all the necessary tools for the pipeline. After the script finishes, it will attach the initialAdminPassword to the VM as custom metadata called `ADMIN_PASS`. Pluck it into Jenkins and delete it afterwards.
 
 Terraform will bring up the following:
