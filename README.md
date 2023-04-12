@@ -159,6 +159,22 @@ $ helmfile destroy
 <img  src="images/cicd.svg"  alt="ci_cd"/>
 </div>
 
+To properly use the pipeline with Jenkins, you need to fork this repository. Jenkins will pull from your repository and commit back to your repository. After deployment, `flask-blog` pods will have a `NodePort` service attached. This is convenient if you want to further setup an IngressController with your custom domain. After that, you can easily issue an SSL certificate by following the [Using Google-managed SSL certificates](https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs) instructions. But if you want to demo the application, you can either configure port-forwarding for the deployed `NodePort` service, or change line `36` in `values/flask-blog-values.yaml` from
+
+```
+##### SERVICE #####
+serviceName: flask-blog-service
+serviceType: NodePort
+```
+to:
+```
+##### SERVICE #####
+serviceName: flask-blog-service
+serviceType: LoadBalancer
+```
+
+After this, you can redeploy (or deploy) the application, and you will have an HTTP LoadBalancer attached to your cluster.
+
 This pipeline was tailored for Google Kubernetes Engine (GKE) on Google Cloud Platform (GCP). Most of the preparation is automated through Terraform. `cd` into `terraform` directory and login to your GCP account using `gcloud auth application-default login` command. After that, execute `terraform plan` and `terraform apply` specifying the id of the project you want to deploy to. Terraform needs around `15-20` minutes to bring up the infrastructure. Jenkins VM has a startup script that will install all the necessary tools for the pipeline. After the script finishes, it will attach the initialAdminPassword to the VM as custom metadata called `ADMIN_PASS`. Pluck it into Jenkins and delete it afterwards.
 
 Terraform will bring up the following:
@@ -187,8 +203,10 @@ The pipeline has four stages.
 
 #### Version Increment
 The app's version is incremented using a custom script located in the `/scripts` directory. Saves the image name, image version, and build number as an environmental variable. Also pulls sensitive data from Jenkins credentials and exports them as environmental variables to use with helmfile.
+
 #### Containerize
 Build the image with the specified Docker repository server, image name, image version, and build number. [Logins to the private docker repo](https://cloud.google.com/artifact-registry/docs/docker/authentication#token) using the Jenkins service account with the appropriate IAM role attached to the instance and pushes the image.
+
 #### Deploy to Production
 Deploys the application to GKE using `helmfile` command. The nodes are able to pull the image from the private Artifact Registry repository through a service account with the right IAM roles.
 
