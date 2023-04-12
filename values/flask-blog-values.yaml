@@ -33,7 +33,7 @@ periodSeconds: 5
 
 ##### SERVICE #####
 serviceName: flask-blog-service
-serviceType: LoadBalancer
+serviceType: NodePort
 servicePort: 80
 serviceProtocol: TCP
 

@@ -83,6 +83,8 @@ jenkins:
         value: "${ARTIFACT_REGION}-docker.pkg.dev"
       - key: "CLUSTER_NAME"
         value: "${CLUSTER_NAME}"
+      - key: "GIT_HUB_REPO"
+        value: ""        
 EOF
 
 cat >/tmp/jenkins/Dockerfile <<EOL
