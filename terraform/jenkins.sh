@@ -146,7 +146,7 @@ sudo docker run --name jenkins-blueocean --restart=on-failure --detach \
   myjenkins-blueocean:2.387.2-1
 
 # wait for jenkins to initiate and generate an initialAdminPassword, attach it to jenkinsVM as metadata
-sleep 30
+sleep 120
 jenkins_admin_pass=$(sudo docker exec jenkins-blueocean cat /var/jenkins_home/secrets/initialAdminPassword)
 gcloud compute instances add-metadata "${JENKINS_INSTANCE_NAME}" \
     --metadata=ADMIN_PASS=${jenkins_admin_pass} --zone=$(gcloud compute instances list ${JENKINS_INSTANCE_NAME} --format 'csv[no-heading](zone)')
