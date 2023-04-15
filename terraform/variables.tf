@@ -15,13 +15,24 @@ variable "compute_zone" {
 
 variable "jenkins_machine_type" {
   type    = string
-  default = "e2-standard-2"
+  default = "e2-small"
+}
+
+variable "agent_machine_type" {
+  type    = string
+  default = "e2-medium"
 }
 
 variable "jenkins_service_account_id" {
   type        = string
   default     = "jenkins"
   description = "Name of the Service Account"
+}
+
+variable "agent_service_account_id" {
+  type        = string
+  default     = "agent1"
+  description = "Agent Service Account"
 }
 
 # ------------- JENKINS -------------
@@ -37,6 +48,11 @@ variable "gke_service_account_id" {
 variable "gke_zone" {
   type    = string
   default = "europe-west3-a"
+}
+
+variable "gke_machine_type" {
+  type    = string
+  default = "e2-medium"
 }
 
 # ------------- GKE -------------
