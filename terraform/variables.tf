@@ -1,5 +1,5 @@
 variable "project_id" {
-  type    = string
+  type = string
 }
 
 # ------------- JENKINS -------------
@@ -63,4 +63,3 @@ variable "artifact_region" {
   default = "europe-west3"
 }
 
-# ------------- ARTIFACT -------------
