@@ -130,7 +130,7 @@ RUN echo "deb [arch=\$(dpkg --print-architecture) \
 COPY --chown=jenkins:jenkins ./casc.yaml /var/jenkins_home/casc.yaml
 
 USER jenkins
-RUN jenkins-plugin-cli --plugins "blueocean docker-workflow configuration-as-code ssh-slaves" && mkdir /var/jenkins_home/.ssh/
+RUN jenkins-plugin-cli --plugins "blueocean docker-workflow configuration-as-code ssh-slaves generic-webhook-trigger" && mkdir /var/jenkins_home/.ssh/
 COPY --chown=jenkins:jenkins ./known_hosts /var/jenkins_home/.ssh/known_hosts
 ENV CASC_JENKINS_CONFIG /var/jenkins_home/casc.yaml
 EOL
