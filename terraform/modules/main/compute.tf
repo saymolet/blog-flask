@@ -5,18 +5,17 @@ resource "google_compute_instance" "jenkins_instance" {
   # allow ingress 80 tcp
   tags = ["http-server"]
 
-  # startup script 
-  metadata_startup_script = file("${path.module}/jenkins.sh")
-  # we will pass arguments through custom metadata key-value pairs
-  metadata = {
-    PROJECT_ID            = var.project_id
-    CLUSTER_ZONE          = var.compute_zone
-    CLUSTER_NAME          = google_container_cluster.primary.name
-    ARTIFACT_NAME         = google_artifact_registry_repository.flask-blog-repo.name
-    ARTIFACT_REGION       = var.artifact_region
-    JENKINS_INSTANCE_NAME = "jenkins-${random_id.jenkins_name_suffix.hex}"
-    AGENT_IP              = google_compute_address.agent-internal-ip.address
-  }
+  metadata_startup_script = templatefile("${path.module}/scripts/jenkins.tmpl",
+    {
+      PROJECT_ID            = var.project_id
+      CLUSTER_ZONE          = var.gke_zone
+      CLUSTER_NAME          = google_container_cluster.primary.name
+      ARTIFACT_NAME         = google_artifact_registry_repository.flask-blog-repo.name
+      ARTIFACT_REGION       = var.artifact_region
+      JENKINS_INSTANCE_NAME = "jenkins-${random_id.jenkins_name_suffix.hex}"
+      AGENT_IP              = google_compute_address.agent-internal-ip.address
+      jenkins_admin_pass    = "$jenkins_admin_pass"
+  })  
 
   boot_disk {
     initialize_params {
@@ -49,7 +48,7 @@ resource "google_compute_instance" "agent_instance" {
   zone         = var.compute_zone
 
   # startup script 
-  metadata_startup_script = file("${path.module}/agent_config.sh")
+  metadata_startup_script = file("${path.module}/scripts/agent_config.sh")
 
   boot_disk {
     initialize_params {

@@ -7,10 +7,6 @@ then
    exit 0
 fi
 
-getMetadata() {
-  curl -fs http://metadata/computeMetadata/v1/instance/attributes/"$1" -H "Metadata-Flavor: Google"
-}
-
 # install docker, create network, create temporary jenkins dir
 sudo apt-get update && sudo apt-get install docker.io -y
 sudo docker network create jenkins
@@ -24,15 +20,6 @@ sudo docker run --name jenkins-docker --rm --detach \
   --volume jenkins-data:/var/jenkins_home \
   --publish 2376:2376 \
   docker:dind --storage-driver overlay2
-
-# get metadata info 
-PROJECT_ID=$(getMetadata PROJECT_ID)
-CLUSTER_ZONE=$(getMetadata CLUSTER_ZONE)
-ARTIFACT_NAME=$(getMetadata ARTIFACT_NAME)
-ARTIFACT_REGION=$(getMetadata ARTIFACT_REGION)
-CLUSTER_NAME=$(getMetadata CLUSTER_NAME)
-JENKINS_INSTANCE_NAME=$(getMetadata JENKINS_INSTANCE_NAME)
-AGENT_IP=$(getMetadata AGENT_IP)
 
 # this file will be shipped to jenkins container, so it can connect to agent without man-in-the-middle attack issue
 ssh-keyscan -H "${AGENT_IP}" | sudo tee /tmp/jenkins/known_hosts
