@@ -1,21 +1,3 @@
-########################### GKE ###########################
-resource "random_id" "gke_cluster_suffix" {
-  byte_length = 4
-}
-
-resource "google_service_account" "gke_flask" {
-  account_id   = var.gke_service_account_id
-  display_name = "GKE Service Account"
-}
-
-resource "google_project_iam_binding" "artifactRegistryReader" {
-  project = var.project_id
-  role    = "roles/artifactregistry.reader"
-  members = [
-    google_service_account.gke_flask.member
-  ]
-}
-
 resource "google_container_cluster" "primary" {
   name     = "flask-blog-cluster-${random_id.gke_cluster_suffix.hex}"
   location = var.compute_zone
@@ -51,4 +33,3 @@ resource "google_container_node_pool" "flask_nodes" {
   }
   depends_on = [google_service_account.gke_flask]
 }
-########################### GKE ###########################
