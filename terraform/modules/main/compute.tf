@@ -3,7 +3,7 @@ resource "google_compute_instance" "jenkins_instance" {
   machine_type = var.jenkins_machine_type
   zone         = var.compute_zone
   # allow ingress 80 tcp
-  tags = ["http-server"]
+  tags = ["http-server", "https-server"]
 
   metadata_startup_script = templatefile("${path.module}/scripts/jenkins.tmpl",
     {
