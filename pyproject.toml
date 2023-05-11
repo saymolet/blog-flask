@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blog"
-version = "0.9.0"
+version = "0.10.0"
 description = "Blog build with Python using Flask. Has authentication, password hashing, database, forms, comments, admin privilages for the first user, errorhandling."
 authors = ["Vladyslav Samoilenko <vladyslav.samoilenko@proton.me>"]
 license = "The Unlicense"
